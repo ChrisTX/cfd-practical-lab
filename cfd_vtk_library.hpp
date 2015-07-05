@@ -97,6 +97,60 @@ namespace VTK {
 				}
 			}
 		}
+
+		template<
+			typename TVector2D,
+			typename TTestFunc
+		> void AddScalars(const TTestFunc& is_contained, const std::string& DataName, TVector2D p, const std::string& LookupTable = "default")
+		{
+			using vector_index_t = typename TVector2D::size_type;
+			static_assert(Type_Safety::has_compatible_call_operator<TVector2D, vector_index_t, vector_index_t>(), "TVector2D has to be callable as u(i,j)");
+			static_assert(Type_Safety::has_compatible_call_operator<TTestFunc, vector_index_t, vector_index_t>()
+				&& std::is_same<bool, std::result_of_t<TTestFunc(vector_index_t, vector_index_t)>>(), "TTestFunc has to be callable as F(i,j) and return bool");
+
+			if(p.get_columns() != GetIMax() + 2 || p.get_rows() != GetJMax() + 2)
+				throw std::invalid_argument{"Unexpected data size!"};
+			
+			using value_type = typename TVector2D::value_type;
+			m_OutputFile << "SCALARS " << DataName << ' ' << VTKTypeName<value_type>::value << '\n';
+			m_OutputFile << "LOOKUP_TABLE " << LookupTable << '\n';
+
+			for(vector_index_t j = 1u; j < GetJMax() + 1u; ++j)
+				for(vector_index_t i = 1u; i < GetIMax() + 1u; ++i)
+					EmitData(p(i,j), true);
+		}
+
+		template<
+			typename TVector2D,
+			typename TTestFunc
+		> void AddVectors(const TTestFunc& is_contained, const std::string& DataName, TVector2D u, TVector2D v)
+		{
+			using vector_index_t = typename TVector2D::size_type;
+			using value_t = typename TVector2D::value_type;
+			static_assert(Type_Safety::has_compatible_call_operator<TVector2D, vector_index_t, vector_index_t>(), "TVector2D has to be callable as u(i,j)");
+			static_assert(Type_Safety::has_compatible_call_operator<TTestFunc, vector_index_t, vector_index_t>()
+				&& std::is_same<bool, std::result_of_t<TTestFunc(vector_index_t, vector_index_t)>>(), "TTestFunc has to be callable as F(i,j) and return bool");
+
+			if(u.get_columns() != v.get_columns() || u.get_rows() != v.get_rows() || u.get_columns() != GetIMax() + 2 || u.get_rows() != GetJMax() + 2)
+				throw std::invalid_argument{"Unexpected data size!"};
+			
+			using value_type = typename TVector2D::value_type;
+			m_OutputFile << "VECTORS " << DataName << ' ' << VTKTypeName<value_type>::value << '\n';
+
+			for(vector_index_t j = 1u; j < GetJMax() + 1u; ++j) {
+				for(vector_index_t i = 1u; i < GetIMax() + 1u; ++i) {
+					if(is_contained(i, j)) {
+						EmitData(u(i,j), false);
+						EmitData(v(i,j), false);
+					}
+					else {
+						EmitData(value_t{0}, false);
+						EmitData(value_t{0}, false);
+					}
+					EmitData(value_t{0}, true);
+				}
+			}
+		}
 	};
 
 	template<

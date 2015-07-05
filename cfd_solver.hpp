@@ -98,9 +98,23 @@ namespace CFD {
 
 					auto& vtkprt = CFD_VTKPrinters.GetNextPrinter();
 					vtkprt.UsePointData();
-					vtkprt.AddScalars("Pressure", m_p);
-					vtkprt.AddVectors("Velocity", m_u, m_v);
+					if(!m_ContainedCells.empty()) {
+						vtkprt.AddScalars(m_ContainedCells, "Pressure", m_p);
+						vtkprt.AddVectors(m_ContainedCells, "Velocity", m_u, m_v);
+					}
+					else {
+						vtkprt.AddScalars("Pressure", m_p);
+						vtkprt.AddVectors("Velocity", m_u, m_v);
+					}
+					// Stream function/vorticity
+					VectorType ψ, ζ;
+					Computeψ(ψ);
+					Computeζ(ζ);
+					vtkprt.AddScalars("Stream function", ψ);
+					vtkprt.AddScalars("Vorticity", ζ);
 				}
+
+				// Streamlines/particles
 				auto streamlines_ptr = m_Streamlines.get();
 				auto particles_ptr = m_Particles.get();
 				if(streamlines_ptr != nullptr) {
@@ -140,7 +154,7 @@ namespace CFD {
 
 			for(size_type i = 1u; i < m_ProblemGeometry.imax; ++i)
 				for(size_type j = 1u; j < m_ProblemGeometry.jmax; ++j)
-					if(m_ObstacleCells[ObstacleCellType_t::interior].count(std::make_pair(i, j)))
+					if(m_ContainedCells(i, j) && m_ContainedCells(i + 1, j) && m_ContainedCells(i, j + 1))
 						ζ(i, j) = (m_u(i, j + 1) - m_u(i, j)) / δy() - (m_v(i + 1, j) - m_v(i, j)) / δx();
 		}
 
