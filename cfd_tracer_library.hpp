@@ -30,6 +30,13 @@ namespace VTK {
 				EmitData(cur_point[1u], false);
 				EmitData(vector_t{0}, true);
 			}
+
+			using size_type = typename VectorT::size_type;
+			m_OutputFile << "VERTICES " << PointsList.size() << ' ' << 2 * PointsList.size() << '\n';
+			for(size_type i = 0u; i < PointsList.size(); ++i) {
+				EmitData(1, false);
+				EmitData(static_cast<int>(i), true);
+			}
 		}
 	};
 
