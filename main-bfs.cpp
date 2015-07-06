@@ -31,5 +31,9 @@ int main() {
 			myobs(i, j) = false;
 
 	cfdsv.SetObstacles(myobs);
+
+	cfdsv.EnableStreaklines(VTK::TimedVTKPointPrinter("streakline-", 0u, "Streakline tracing", VTK::VTKFileFormat_t::ASCII), 0.1, 0.1, 50, 0., 1., 0., 2.);
+	cfdsv.EnableParticles(VTK::TimedVTKPointPrinter("particle-", 0u, "Particle tracing", VTK::VTKFileFormat_t::ASCII), 0.1, 50, 0., 1., 0., 2.);
+
 	cfdsv.Solve();
 }

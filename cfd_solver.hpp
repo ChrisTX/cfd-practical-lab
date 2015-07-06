@@ -142,7 +142,7 @@ namespace CFD {
 				ψ(i, 0) = 0;
 				for(size_type j = 1u; j <= m_ProblemGeometry.jmax; ++j) {
 					ψ(i, j) = ψ(i, j - 1);
-					if(m_ContainedCells(i, j))
+					if(m_ContainedCells.empty() || m_ContainedCells(i, j))
 						ψ(i, j) += m_u(i, j) * δx();
 				}
 			}
@@ -154,7 +154,7 @@ namespace CFD {
 
 			for(size_type i = 1u; i < m_ProblemGeometry.imax; ++i)
 				for(size_type j = 1u; j < m_ProblemGeometry.jmax; ++j)
-					if(m_ContainedCells(i, j) && m_ContainedCells(i + 1, j) && m_ContainedCells(i, j + 1))
+					if(m_ContainedCells.empty() || (m_ContainedCells(i, j) && m_ContainedCells(i + 1, j) && m_ContainedCells(i, j + 1)))
 						ζ(i, j) = (m_u(i, j + 1) - m_u(i, j)) / δy() - (m_v(i + 1, j) - m_v(i, j)) / δx();
 		}
 
@@ -201,6 +201,7 @@ namespace CFD {
 
 		T InterpolatedU(T x, T y) const
 		{
+			assert(x <= m_ProblemGeometry.xlength && y <= m_ProblemGeometry.ylength);
 			const size_type i_star = static_cast<size_type>( x/δx() ) + 1u;
 			const size_type j_star = static_cast<size_type>( ( y + δy()/2 )/δy() ) + 1u;
 
@@ -215,6 +216,7 @@ namespace CFD {
 
 		T InterpolatedV(T x, T y) const
 		{
+			assert(x <= m_ProblemGeometry.xlength && y <= m_ProblemGeometry.ylength);
 			const size_type i_star = static_cast<size_type>( ( x + δx()/2 )/δx() ) + 1u;
 			const size_type j_star = static_cast<size_type>( y/δy() ) + 1u;
 
@@ -232,7 +234,7 @@ namespace CFD {
 			const size_type i = static_cast<size_type>( x/δx() );
 			const size_type j = static_cast<size_type>( y/δy() );
 
-			if(!i || i > m_ProblemGeometry.imax || !j || j > m_ProblemGeometry.jmax)
+			if(!i || i >= m_ProblemGeometry.imax || !j || j >= m_ProblemGeometry.jmax)
 				return false;
 
 			auto missing_cells_p = m_ObstacleCells.find(ObstacleCellType_t::notcontained);

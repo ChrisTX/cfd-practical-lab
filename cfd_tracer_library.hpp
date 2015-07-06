@@ -20,13 +20,15 @@ namespace VTK {
 		explicit VTKPointPrinter(const std::string& FileName, const std::string& vtkDescription, VTKFileFormat_t vtkFormat, const VectorT& PointsList) 
 		: VTKPrinter(FileName, vtkDescription, std::move(vtkFormat), 0u, PointsList.size())
 		{
+			using vector_t = typename VectorT::value_type::value_type;
 			if(!PointsList.size())
 				throw std::invalid_argument{"Cannot create a file without points!"};
 
 			m_OutputFile << "DATASET POLYDATA\nPOINTS " << PointsList.size() << ' ' << VTKTypeName<typename VectorT::value_type::value_type>::value << '\n';
 			for(const auto& cur_point : PointsList) {
 				EmitData(cur_point[0u], false);
-				EmitData(cur_point[1u], true);
+				EmitData(cur_point[1u], false);
+				EmitData(vector_t{0}, true);
 			}
 		}
 	};
