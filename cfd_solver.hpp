@@ -110,7 +110,7 @@ namespace CFD {
 					VectorType ψ, ζ;
 					Computeψ(ψ);
 					Computeζ(ζ);
-					vtkprt.AddScalars("Stream function", ψ);
+					vtkprt.AddScalars("StreamFunction", ψ);
 					vtkprt.AddScalars("Vorticity", ζ);
 				}
 
@@ -165,8 +165,6 @@ namespace CFD {
 
 			for(size_type i = 1u; i <= m_ProblemGeometry.imax; ++i) {
 				for(size_type j = 1u; j <= m_ProblemGeometry.jmax; ++j) {
-					if(i == 11 && j == 12)
-						printf("I got u now");
 					if(!contained_cells(i, j)) {
 						using raw_t = std::underlying_type_t<ObstacleCellType_t>;
 						raw_t current_cell_type{0};
@@ -186,7 +184,6 @@ namespace CFD {
 			}
 
 			m_ContainedCells = std::move(contained_cells);
-			printobs();
 		}
 
 		void SetBoundaryCondition(BoundaryEdge_t bc_edge, BoundaryCondition_t bc_type)
@@ -603,73 +600,6 @@ namespace CFD {
 				m_u(i - 1, j) = 0;
 				m_u(i, j) = -m_u(i, j + 1);
 				m_v(i, j - 1) = -m_v(i - 1, j - 1);
-			}
-		}
-
-		void printobs()
-		{
-			std::cout << "north:\n";
-			for(const auto& index_pair : m_ObstacleCells[ObstacleCellType_t::north]) {
-				const auto i = index_pair.first;
-				const auto j = index_pair.second;
-
-				std::cout << i << ' ' << j << std::endl;
-			}
-			std::cout << "south:\n";
-			for(const auto& index_pair : m_ObstacleCells[ObstacleCellType_t::south]) {
-				const auto i = index_pair.first;
-				const auto j = index_pair.second;
-
-				std::cout << i << ' ' << j << std::endl;
-			}
-			std::cout << "west:\n";
-			for(const auto& index_pair : m_ObstacleCells[ObstacleCellType_t::west]) {
-				const auto i = index_pair.first;
-				const auto j = index_pair.second;
-
-				std::cout << i << ' ' << j << std::endl;
-			}
-			std::cout << "east:\n";
-			for(const auto& index_pair : m_ObstacleCells[ObstacleCellType_t::east]) {
-				const auto i = index_pair.first;
-				const auto j = index_pair.second;
-
-				std::cout << i << ' ' << j << std::endl;
-			}
-			std::cout << "northeast:\n";
-			for(const auto& index_pair : m_ObstacleCells[ObstacleCellType_t::northeast]) {
-				const auto i = index_pair.first;
-				const auto j = index_pair.second;
-
-				std::cout << i << ' ' << j << std::endl;
-			}
-			std::cout << "southeast:\n";
-			for(const auto& index_pair : m_ObstacleCells[ObstacleCellType_t::southeast]) {
-				const auto i = index_pair.first;
-				const auto j = index_pair.second;
-
-				std::cout << i << ' ' << j << std::endl;
-			}
-			std::cout << "southwest:\n";
-			for(const auto& index_pair : m_ObstacleCells[ObstacleCellType_t::southwest]) {
-				const auto i = index_pair.first;
-				const auto j = index_pair.second;
-
-				std::cout << i << ' ' << j << std::endl;
-			}
-			std::cout << "northwest:\n";
-			for(const auto& index_pair : m_ObstacleCells[ObstacleCellType_t::northwest]) {
-				const auto i = index_pair.first;
-				const auto j = index_pair.second;
-
-				std::cout << i << ' ' << j << std::endl;
-			}
-			std::cout << "outside:\n";
-			for(const auto& index_pair : m_ObstacleCells[ObstacleCellType_t::notcontained]) {
-				const auto i = index_pair.first;
-				const auto j = index_pair.second;
-
-				std::cout << i << ' ' << j << std::endl;
 			}
 		}
 

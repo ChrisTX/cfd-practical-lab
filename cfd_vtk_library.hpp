@@ -64,7 +64,7 @@ namespace VTK {
 			using vector_index_t = typename TVector2D::size_type;
 			static_assert(Type_Safety::has_compatible_call_operator<TVector2D, vector_index_t, vector_index_t>(), "TVector2D has to be callable as u(i,j)");
 
-			if(p.get_columns() != GetIMax() + 2 || p.get_rows() != GetJMax() + 2)
+			if(p.get_columns() < GetIMax() + 1u || p.get_rows() < GetJMax() + 1u)
 				throw std::invalid_argument{"Unexpected data size!"};
 			
 			using value_type = typename TVector2D::value_type;
@@ -83,7 +83,7 @@ namespace VTK {
 			using vector_index_t = typename TVector2D::size_type;
 			static_assert(Type_Safety::has_compatible_call_operator<TVector2D, vector_index_t, vector_index_t>(), "TVector2D has to be callable as u(i,j)");
 
-			if(u.get_columns() != v.get_columns() || u.get_rows() != v.get_rows() || u.get_columns() != GetIMax() + 2 || u.get_rows() != GetJMax() + 2)
+			if(u.get_columns() != v.get_columns() || u.get_rows() != v.get_rows() || u.get_columns() < GetIMax() + 1u || u.get_rows() < GetJMax() + 1u)
 				throw std::invalid_argument{"Unexpected data size!"};
 			
 			using value_type = typename TVector2D::value_type;
@@ -104,11 +104,11 @@ namespace VTK {
 		> void AddScalars(const TTestFunc& is_contained, const std::string& DataName, TVector2D p, const std::string& LookupTable = "default")
 		{
 			using vector_index_t = typename TVector2D::size_type;
+			using value_t = typename TVector2D::value_type;
 			static_assert(Type_Safety::has_compatible_call_operator<TVector2D, vector_index_t, vector_index_t>(), "TVector2D has to be callable as u(i,j)");
-			static_assert(Type_Safety::has_compatible_call_operator<TTestFunc, vector_index_t, vector_index_t>()
-				&& std::is_same<bool, std::result_of_t<TTestFunc(vector_index_t, vector_index_t)>>(), "TTestFunc has to be callable as F(i,j) and return bool");
+			static_assert(Type_Safety::has_compatible_call_operator<TTestFunc, vector_index_t, vector_index_t>(), "TTestFunc has to be callable as F(i,j)");
 
-			if(p.get_columns() != GetIMax() + 2 || p.get_rows() != GetJMax() + 2)
+			if(p.get_columns() < GetIMax() + 1u || p.get_rows() < GetJMax() + 1u)
 				throw std::invalid_argument{"Unexpected data size!"};
 			
 			using value_type = typename TVector2D::value_type;
@@ -117,7 +117,10 @@ namespace VTK {
 
 			for(vector_index_t j = 1u; j < GetJMax() + 1u; ++j)
 				for(vector_index_t i = 1u; i < GetIMax() + 1u; ++i)
-					EmitData(p(i,j), true);
+					if(is_contained(i, j))
+						EmitData(p(i,j), true);
+					else
+						EmitData(value_t{0}, true);
 		}
 
 		template<
@@ -128,10 +131,9 @@ namespace VTK {
 			using vector_index_t = typename TVector2D::size_type;
 			using value_t = typename TVector2D::value_type;
 			static_assert(Type_Safety::has_compatible_call_operator<TVector2D, vector_index_t, vector_index_t>(), "TVector2D has to be callable as u(i,j)");
-			static_assert(Type_Safety::has_compatible_call_operator<TTestFunc, vector_index_t, vector_index_t>()
-				&& std::is_same<bool, std::result_of_t<TTestFunc(vector_index_t, vector_index_t)>>(), "TTestFunc has to be callable as F(i,j) and return bool");
+			static_assert(Type_Safety::has_compatible_call_operator<TTestFunc, vector_index_t, vector_index_t>(), "TTestFunc has to be callable as F(i,j)");
 
-			if(u.get_columns() != v.get_columns() || u.get_rows() != v.get_rows() || u.get_columns() != GetIMax() + 2 || u.get_rows() != GetJMax() + 2)
+			if(u.get_columns() != v.get_columns() || u.get_rows() != v.get_rows() || u.get_columns() < GetIMax() + 1u || u.get_rows() < GetJMax() + 1u)
 				throw std::invalid_argument{"Unexpected data size!"};
 			
 			using value_type = typename TVector2D::value_type;
